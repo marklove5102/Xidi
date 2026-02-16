@@ -27,6 +27,7 @@
 #include "ElementMapper.h"
 #include "ForceFeedbackTypes.h"
 #include "Globals.h"
+#include "PhysicalController.h"
 #include "Strings.h"
 #include "VirtualController.h"
 #include "VirtualControllerTypes.h"
@@ -63,10 +64,16 @@ namespace Xidi
             const std::wstring_view knownMapperName = knownMapper.first;
             const SCapabilities knownMapperCapabilities = knownMapper.second->GetCapabilities();
 
-            Infra::Message::OutputFormatted(kDumpSeverity, L"  %s:", knownMapperName.data());
+            Infra::Message::OutputFormatted(
+                kDumpSeverity,
+                L"  %.*s:",
+                static_cast<unsigned int>(knownMapperName.length()),
+                knownMapperName.data());
 
             Infra::Message::OutputFormatted(
-                kDumpSeverity, L"    numAxes = %u", (unsigned int)knownMapperCapabilities.numAxes);
+                kDumpSeverity,
+                L"    numAxes = %u",
+                static_cast<unsigned int>(knownMapperCapabilities.numAxes));
             for (unsigned int i = 0; i < knownMapperCapabilities.numAxes; ++i)
               Infra::Message::OutputFormatted(
                   kDumpSeverity,
@@ -80,7 +87,7 @@ namespace Xidi
             Infra::Message::OutputFormatted(
                 kDumpSeverity,
                 L"    numButtons = %u",
-                (unsigned int)knownMapperCapabilities.numButtons);
+                static_cast<unsigned int>(knownMapperCapabilities.numButtons));
             Infra::Message::OutputFormatted(
                 kDumpSeverity,
                 L"    hasPov = %s",
@@ -127,7 +134,8 @@ namespace Xidi
         {
           Infra::Message::OutputFormatted(
               Infra::Message::ESeverity::Error,
-              L"Internal error: Attempting to unregister unknown mapper %s.",
+              L"Internal error: Attempting to unregister unknown mapper \"%.*s\".",
+              static_cast<unsigned int>(name.length()),
               name.data());
           return;
         }
@@ -136,7 +144,8 @@ namespace Xidi
         {
           Infra::Message::OutputFormatted(
               Infra::Message::ESeverity::Error,
-              L"Internal error: Object mismatch while attempting to unregister mapper %s.",
+              L"Internal error: Object mismatch while attempting to unregister mapper \"%.*s\".",
+              static_cast<unsigned int>(name.length()),
               name.data());
           return;
         }
@@ -266,6 +275,54 @@ namespace Xidi
       return capabilities;
     }
 
+    /// Generates a physical controller requirements data structure from a controller element map
+    /// and a force feedback element map.
+    /// @param [in] elements Map of controller elements.
+    /// @param [in] forceFeedbackActuators Map of force feedback actuators.
+    /// @return Required physical controller capabilities associated with the controller elements
+    /// map and force feedback actuator map.
+    static SPhysicalCapabilities DerivePhysicalControllerRequirements(
+        const Mapper::SElementMap& elements,
+        const Mapper::SForceFeedbackActuatorMap& forceFeedbackActuators)
+    {
+      SPhysicalCapabilities requirements{};
+
+      requirements[EPhysicalStick::LeftX] = (nullptr != elements.stickLeftX);
+      requirements[EPhysicalStick::LeftY] = (nullptr != elements.stickLeftY);
+      requirements[EPhysicalStick::RightX] = (nullptr != elements.stickRightX);
+      requirements[EPhysicalStick::RightY] = (nullptr != elements.stickRightY);
+
+      requirements[EPhysicalTrigger::LT] = (nullptr != elements.triggerLT);
+      requirements[EPhysicalTrigger::RT] = (nullptr != elements.triggerRT);
+
+      requirements[EPhysicalButton::DpadUp] = (nullptr != elements.dpadUp);
+      requirements[EPhysicalButton::DpadDown] = (nullptr != elements.dpadDown);
+      requirements[EPhysicalButton::DpadLeft] = (nullptr != elements.dpadLeft);
+      requirements[EPhysicalButton::DpadRight] = (nullptr != elements.dpadRight);
+      requirements[EPhysicalButton::A] = (nullptr != elements.buttonA);
+      requirements[EPhysicalButton::B] = (nullptr != elements.buttonB);
+      requirements[EPhysicalButton::X] = (nullptr != elements.buttonX);
+      requirements[EPhysicalButton::Y] = (nullptr != elements.buttonY);
+      requirements[EPhysicalButton::LB] = (nullptr != elements.buttonLB);
+      requirements[EPhysicalButton::RB] = (nullptr != elements.buttonRB);
+      requirements[EPhysicalButton::Back] = (nullptr != elements.buttonBack);
+      requirements[EPhysicalButton::Start] = (nullptr != elements.buttonStart);
+      requirements[EPhysicalButton::LS] = (nullptr != elements.buttonLS);
+      requirements[EPhysicalButton::RS] = (nullptr != elements.buttonRS);
+      requirements[EPhysicalButton::Guide] = (nullptr != elements.buttonGuide);
+      requirements[EPhysicalButton::Share] = (nullptr != elements.buttonShare);
+
+      requirements[EForceFeedbackActuator::LeftMotor] = forceFeedbackActuators.leftMotor.isPresent;
+      requirements[EForceFeedbackActuator::RightMotor] =
+          forceFeedbackActuators.rightMotor.isPresent;
+      requirements[EForceFeedbackActuator::LeftImpulseTrigger] =
+          forceFeedbackActuators.leftImpulseTrigger.isPresent;
+      requirements[EForceFeedbackActuator::RightImpulseTrigger] =
+          forceFeedbackActuators.rightImpulseTrigger.isPresent;
+
+      return requirements;
+    }
+
     /// Filters (by saturation) analog stick values that might be slightly out of range due to
     /// differences between the implemented range and the physical controller's actual range.
     /// @param [in] analogValue Raw analog value.
@@ -393,6 +450,8 @@ namespace Xidi
         : elements(std::move(elements)),
           forceFeedbackActuators(forceFeedbackActuators),
           capabilities(DeriveCapabilitiesFromElementMap(this->elements, forceFeedbackActuators)),
+          physicalControllerRequirements(
+              DerivePhysicalControllerRequirements(this->elements.named, forceFeedbackActuators)),
           name(name)
     {
       if (false == name.empty()) MapperRegistry::GetInstance().RegisterMapper(name, this);
@@ -469,7 +528,8 @@ namespace Xidi
                 if (nullptr == fallbackMapper)
                   Infra::Message::OutputFormatted(
                       Infra::Message::ESeverity::Warning,
-                      L"Could not locate mapper \"%s\" specified in the configuration file as the default.",
+                      L"Could not locate mapper \"%.*s\" specified in the configuration file as the default.",
+                      static_cast<unsigned int>(fallbackMapperName.length()),
                       fallbackMapperName.data());
               }
 
@@ -493,7 +553,7 @@ namespace Xidi
                 {
                   std::wstring_view configuredMapperName =
                       mapperConfigData[Strings::MapperTypeConfigurationNameString(i)]->GetString();
-                  configuredMapper[i] = GetByName(configuredMapperName.data());
+                  configuredMapper[i] = GetByName(configuredMapperName);
 
                   if (nullptr == configuredMapper[i])
                   {
@@ -501,7 +561,7 @@ namespace Xidi
                         Infra::Message::ESeverity::Warning,
                         L"Could not locate mapper \"%s\" specified in the configuration file for controller %u.",
                         configuredMapperName.data(),
-                        (unsigned int)(1 + i));
+                        static_cast<unsigned int>(1 + i));
                     configuredMapper[i] = fallbackMapper;
                   }
                 }
@@ -532,9 +592,31 @@ namespace Xidi
             for (TControllerIdentifier i = 0; i < VirtualController::GetActualCount(); ++i)
               Infra::Message::OutputFormatted(
                   Infra::Message::ESeverity::Info,
-                  L"    [%u]: %s",
-                  (unsigned int)(1 + i),
+                  L"    [%u]: %.*s",
+                  static_cast<unsigned int>(1 + i),
+                  static_cast<unsigned int>(configuredMapper[i]->GetName().length()),
                   configuredMapper[i]->GetName().data());
+
+            // Check compatibility of all assigned mappers with the configured physical controller
+            // backend. Incompatibility is not a fatal error, but it does mean the controller may
+            // not behave as expected and therefore generates a warning in the logs.
+            auto physicalControllerBackend = GetPhysicalControllerBackend();
+            auto physicalControllerBackendCapabilities =
+                physicalControllerBackend->GetCapabilities();
+            for (TControllerIdentifier i = 0; i < VirtualController::GetActualCount(); ++i)
+            {
+              if (false ==
+                  configuredMapper[i]->IsCompatibleWithPhysicalControllerCapabilities(
+                      physicalControllerBackendCapabilities))
+                Infra::Message::OutputFormatted(
+                    Infra::Message::ESeverity::Warning,
+                    L"Controller %u may not behave as expected because assigned mapper \"%.*s\" is not compatible with physical controller backend \"%.*s\".",
+                    static_cast<unsigned int>(1 + i),
+                    static_cast<unsigned int>(configuredMapper[i]->GetName().length()),
+                    configuredMapper[i]->GetName().data(),
+                    static_cast<unsigned int>(physicalControllerBackend->PluginName().length()),
+                    physicalControllerBackend->PluginName().data());
+            }
           });
 
       if (controllerIdentifier >= VirtualController::GetActualCount())
@@ -555,45 +637,27 @@ namespace Xidi
       return &kNullMapper;
     }
 
-    SPhysicalCapabilities Mapper::GetPhysicalControllerRequiredCapabilities(void) const
+    bool Mapper::IsCompatibleWithPhysicalControllerCapabilities(
+        SPhysicalCapabilities capabilities) const
     {
-      SPhysicalCapabilities requirements{};
+      if ((capabilities.stick.to_ulong() & physicalControllerRequirements.stick.to_ulong()) !=
+          physicalControllerRequirements.stick.to_ulong())
+        return false;
 
-      requirements[EPhysicalStick::LeftX] = (nullptr != elements.named.stickLeftX);
-      requirements[EPhysicalStick::LeftY] = (nullptr != elements.named.stickLeftY);
-      requirements[EPhysicalStick::RightX] = (nullptr != elements.named.stickRightX);
-      requirements[EPhysicalStick::RightY] = (nullptr != elements.named.stickRightY);
+      if ((capabilities.trigger.to_ulong() & physicalControllerRequirements.trigger.to_ulong()) !=
+          physicalControllerRequirements.trigger.to_ulong())
+        return false;
 
-      requirements[EPhysicalTrigger::LT] = (nullptr != elements.named.triggerLT);
-      requirements[EPhysicalTrigger::RT] = (nullptr != elements.named.triggerRT);
+      if ((capabilities.button.to_ulong() & physicalControllerRequirements.button.to_ulong()) !=
+          physicalControllerRequirements.button.to_ulong())
+        return false;
 
-      requirements[EPhysicalButton::DpadUp] = (nullptr != elements.named.dpadUp);
-      requirements[EPhysicalButton::DpadDown] = (nullptr != elements.named.dpadDown);
-      requirements[EPhysicalButton::DpadLeft] = (nullptr != elements.named.dpadLeft);
-      requirements[EPhysicalButton::DpadRight] = (nullptr != elements.named.dpadRight);
-      requirements[EPhysicalButton::A] = (nullptr != elements.named.buttonA);
-      requirements[EPhysicalButton::B] = (nullptr != elements.named.buttonB);
-      requirements[EPhysicalButton::X] = (nullptr != elements.named.buttonX);
-      requirements[EPhysicalButton::Y] = (nullptr != elements.named.buttonY);
-      requirements[EPhysicalButton::LB] = (nullptr != elements.named.buttonLB);
-      requirements[EPhysicalButton::RB] = (nullptr != elements.named.buttonRB);
-      requirements[EPhysicalButton::Back] = (nullptr != elements.named.buttonBack);
-      requirements[EPhysicalButton::Start] = (nullptr != elements.named.buttonStart);
-      requirements[EPhysicalButton::LS] = (nullptr != elements.named.buttonLS);
-      requirements[EPhysicalButton::RS] = (nullptr != elements.named.buttonRS);
-      requirements[EPhysicalButton::Guide] = (nullptr != elements.named.buttonGuide);
-      requirements[EPhysicalButton::Share] = (nullptr != elements.named.buttonShare);
+      if ((capabilities.forceFeedbackActuator.to_ulong() &
+           physicalControllerRequirements.forceFeedbackActuator.to_ulong()) !=
+          physicalControllerRequirements.forceFeedbackActuator.to_ulong())
+        return false;
 
-      requirements[EForceFeedbackActuator::LeftMotor] =
-          forceFeedbackActuators.named.leftMotor.isPresent;
-      requirements[EForceFeedbackActuator::RightMotor] =
-          forceFeedbackActuators.named.rightMotor.isPresent;
-      requirements[EForceFeedbackActuator::LeftImpulseTrigger] =
-          forceFeedbackActuators.named.leftImpulseTrigger.isPresent;
-      requirements[EForceFeedbackActuator::RightImpulseTrigger] =
-          forceFeedbackActuators.named.rightImpulseTrigger.isPresent;
-
-      return requirements;
+      return true;
     }
 
     ForceFeedback::SPhysicalActuatorComponents Mapper::MapForceFeedbackVirtualToPhysical(

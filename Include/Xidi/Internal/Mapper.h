@@ -286,7 +286,19 @@ namespace Xidi
       /// capabilities that either match or exceed the required capabilities reported by this
       /// mapper.
       /// @return Physical controller capabilities structure indicating this mapper's requirements.
-      SPhysicalCapabilities GetPhysicalControllerRequiredCapabilities(void) const;
+      inline SPhysicalCapabilities GetPhysicalControllerRequiredCapabilities(void) const
+      {
+        return physicalControllerRequirements;
+      }
+
+      /// Determines if this mapper object is compatible with a physical controller having the
+      /// specified capabilities. In this context "compatibility" means that the capabilities of the
+      /// physical controller includes all of the controller elements and force feedback actuators
+      /// that this mapper object uses.
+      /// @param [in] capabilities Capabilities of the physical controller. Typically this would be
+      /// obtained from a physical controller backend.
+      /// @return `true` if this mapper is fully compatible, `false` otherwise.
+      bool IsCompatibleWithPhysicalControllerCapabilities(SPhysicalCapabilities capabilities) const;
 
       /// Maps from virtual force feedback effect magnitude component to physical force feedback
       /// actuator values.
@@ -328,6 +340,10 @@ namespace Xidi
       /// Initialization of this member depends on prior initialization of #elements so it
       /// must come after.
       const SCapabilities capabilities;
+
+      /// Requirements of the physical controller in order for this mapper to be considered fully
+      /// compatible with it.
+      const SPhysicalCapabilities physicalControllerRequirements;
 
       /// Name of this mapper.
       const std::wstring_view name;

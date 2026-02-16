@@ -118,10 +118,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\NullBackend.cpp" />
     <ClCompile Include="Source\PluginExampleEntry.cpp" />
     <ClCompile Include="Source\SimpleXInputBackend.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\PluginExample\Internal\NullBackend.h" />
     <ClInclude Include="Include\PluginExample\Internal\SimpleXInputBackend.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

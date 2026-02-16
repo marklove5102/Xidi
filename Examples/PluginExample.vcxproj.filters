@@ -21,9 +21,15 @@
     <ClCompile Include="Source\PluginExampleEntry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\NullBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\PluginExample\Internal\SimpleXInputBackend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\PluginExample\Internal\NullBackend.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
