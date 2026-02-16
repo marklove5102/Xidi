@@ -74,7 +74,7 @@ namespace Xidi
     if (NULL == pluginHandle)
     {
       Infra::Message::OutputFormatted(
-          Infra::Message::ESeverity::Info,
+          Infra::Message::ESeverity::Error,
           L"Failed to load plugin \"%s\": %s",
           pluginFilename,
           Infra::Strings::FromSystemErrorCode(GetLastError()).AsCString());
@@ -86,7 +86,7 @@ namespace Xidi
     if (NULL == xidiPluginGetCountProc)
     {
       Infra::Message::OutputFormatted(
-          Infra::Message::ESeverity::Info,
+          Infra::Message::ESeverity::Error,
           L"Failed to load plugin \"%s\": Unable to locate entry point \"%s\": %s",
           pluginFilename,
           _CRT_WIDE(XIDI_PLUGIN_GET_COUNT_PROC_NAME),
@@ -101,7 +101,7 @@ namespace Xidi
     if (NULL == xidiPluginGetInterfaceProc)
     {
       Infra::Message::OutputFormatted(
-          Infra::Message::ESeverity::Info,
+          Infra::Message::ESeverity::Error,
           L"Failed to load plugin \"%s\": Unable to locate entry point \"%s\": %s",
           pluginFilename,
           _CRT_WIDE(XIDI_PLUGIN_GET_INTERFACE_PROC_NAME),
