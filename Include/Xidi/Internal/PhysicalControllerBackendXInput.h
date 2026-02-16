@@ -23,7 +23,7 @@ namespace Xidi
 
     // IPlugin
     std::wstring_view PluginName(void) override;
-    void Initialize(void) override;
+    bool Initialize(void) override;
 
     // IPhysicalControllerBackend
     TPhysicalControllerIndex MaxPhysicalControllerCount(void) override;

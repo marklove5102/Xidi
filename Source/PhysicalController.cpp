@@ -340,7 +340,17 @@ namespace Xidi
               physicalControllerBackend = new PhysicalControllerBackendXInput();
             }
 
-            physicalControllerBackend->Initialize();
+            const bool backendInitializationResult = physicalControllerBackend->Initialize();
+            if (false == backendInitializationResult)
+            {
+              Infra::Message::OutputFormatted(
+                  Infra::Message::ESeverity::Error,
+                  L"Physical controller backend \"%.*s\" failed to initialize. Using the built-in default backend instead.",
+                  static_cast<int>(selectedBackend.length()),
+                  selectedBackend.data());
+              physicalControllerBackend = new PhysicalControllerBackendXInput();
+            }
+
             isInitialized = true;
           });
     }

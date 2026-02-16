@@ -142,7 +142,10 @@ namespace Xidi
         return L"XInput (fake, for testing)";
       }
 
-      void Initialize(void) override {}
+      bool Initialize(void) override
+      {
+        return true;
+      }
 
       // IPhysicalControllerBackend
       TPhysicalControllerIndex MaxPhysicalControllerCount(void) override

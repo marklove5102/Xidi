@@ -28,7 +28,10 @@ namespace XidiPluginExample
     return L"SimpleXInput";
   }
 
-  void SimpleXInputBackend::Initialize(void) {}
+  bool SimpleXInputBackend::Initialize(void)
+  {
+    return true;
+  }
 
   TPhysicalControllerIndex SimpleXInputBackend::MaxPhysicalControllerCount(void)
   {

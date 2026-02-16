@@ -51,7 +51,9 @@ namespace Xidi
     /// unconditionally load all plugin DLL files that are requested in the configuration file and
     /// subsequenty request interface pointers to all available plugin interfaces, but it will only
     /// initialize the specific plugin interfaces that it intends to use.
-    virtual void Initialize(void) = 0;
+    /// @return `true` if initialization was successful and the plugin can be used, `false`
+    /// otherwise.
+    virtual bool Initialize(void) = 0;
   };
 
 } // namespace Xidi

@@ -23,7 +23,10 @@ namespace XidiPluginExample
     return L"Null";
   }
 
-  void NullBackend::Initialize(void) {}
+  bool NullBackend::Initialize(void)
+  {
+    return true;
+  }
 
   TPhysicalControllerIndex NullBackend::MaxPhysicalControllerCount(void)
   {

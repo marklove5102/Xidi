@@ -26,9 +26,10 @@ namespace Xidi
     return L"XInput (built-in)";
   }
 
-  void PhysicalControllerBackendXInput::Initialize(void)
+  bool PhysicalControllerBackendXInput::Initialize(void)
   {
     ImportApiXInput::Initialize();
+    return true;
   }
 
   TPhysicalControllerIndex PhysicalControllerBackendXInput::MaxPhysicalControllerCount(void)
