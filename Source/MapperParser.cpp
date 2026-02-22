@@ -942,15 +942,15 @@ namespace Xidi
                      (unsigned int)EButton::Count)
               .Data();
 
-        const unsigned int kButtonNumber = maybeButtonNumber.value() - 1;
-        if (kButtonNumber >= (unsigned int)EButton::Count)
+        const unsigned int buttonNumber = *maybeButtonNumber - 1;
+        if (buttonNumber >= (unsigned int)EButton::Count)
           return Infra::Strings::Format(
                      L"Button: Parameter \"%s\" must be a number between 1 and %u",
                      std::wstring(params).c_str(),
                      (unsigned int)EButton::Count)
               .Data();
 
-        return std::make_unique<ButtonMapper>((EButton)kButtonNumber);
+        return std::make_unique<ButtonMapper>((EButton)buttonNumber);
       }
 
       ElementMapperOrError MakeCompoundMapper(std::wstring_view params)
@@ -1033,15 +1033,15 @@ namespace Xidi
                      (Keyboard::kVirtualKeyboardKeyCount - 1))
               .Data();
 
-        const unsigned int kKeyScanCode = maybeKeyScanCode.value();
-        if (kKeyScanCode >= Keyboard::kVirtualKeyboardKeyCount)
+        const unsigned int keyScanCode = *maybeKeyScanCode;
+        if (keyScanCode >= Keyboard::kVirtualKeyboardKeyCount)
           return Infra::Strings::Format(
                      L"Keyboard: \"%s\" must map to a scan code between 0 and %u",
                      std::wstring(params).c_str(),
                      (Keyboard::kVirtualKeyboardKeyCount - 1))
               .Data();
 
-        return std::make_unique<KeyboardMapper>((Keyboard::TKeyIdentifier)kKeyScanCode);
+        return std::make_unique<KeyboardMapper>((Keyboard::TKeyIdentifier)keyScanCode);
       }
 
       ElementMapperOrError MakeMouseAxisMapper(std::wstring_view params)
@@ -1066,8 +1066,21 @@ namespace Xidi
                      std::wstring(params).c_str())
               .Data();
 
-        const Mouse::EMouseButton mouseButton = maybeMouseButton.value();
+        const Mouse::EMouseButton mouseButton = *maybeMouseButton;
         return std::make_unique<MouseButtonMapper>(mouseButton);
+      }
+
+      ElementMapperOrError MakeMouseSpeedModifierMapper(std::wstring_view params)
+      {
+        std::optional<unsigned int> maybeMouseSpeedScalingFactor = ParseUnsignedInteger(params, 10);
+        if (false == maybeMouseSpeedScalingFactor.has_value())
+          return Infra::Strings::Format(
+                     L"MouseSpeedModifier: \"%s\" must be a non-negative integer",
+                     std::wstring(params).c_str())
+              .Data();
+
+        const unsigned int mouseSpeedScalingFactor = *maybeMouseSpeedScalingFactor;
+        return std::make_unique<MouseSpeedModifierMapper>(mouseSpeedScalingFactor);
       }
 
       ElementMapperOrError MakeNullMapper(std::wstring_view params)
@@ -1200,7 +1213,7 @@ namespace Xidi
                      std::wstring(paramParts.first).c_str())
               .Data();
 
-        const EAxis axisFirst = maybeAxisFirst.value();
+        const EAxis axisFirst = *maybeAxisFirst;
 
         // Second parameter is required. It is a string that specifies the second axis in the
         // projection.
@@ -1216,7 +1229,7 @@ namespace Xidi
                      std::wstring(paramParts.first).c_str())
               .Data();
 
-        const EAxis axisSecond = maybeAxisSecond.value();
+        const EAxis axisSecond = *maybeAxisSecond;
         if (axisFirst == axisSecond) return L"MagnitudeProjection: Axes must be different";
 
         // No further parameters allowed.
@@ -1250,6 +1263,7 @@ namespace Xidi
                 {L"keystroke", &MakeKeyboardMapper},
                 {L"mouseaxis", &MakeMouseAxisMapper},
                 {L"mousebutton", &MakeMouseButtonMapper},
+                {L"mousespeedmodifier", &MakeMouseSpeedModifierMapper},
                 {L"pov", &MakePovMapper},
                 {L"povhat", &MakePovMapper},
                 {L"null", &MakeNullMapper},
