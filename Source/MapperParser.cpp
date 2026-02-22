@@ -16,9 +16,9 @@
 #include <cstddef>
 #include <cwchar>
 #include <cwctype>
-#include <map>
 #include <optional>
 #include <string_view>
+#include <unordered_map>
 
 #include <Infra/Core/Strings.h>
 #include <Infra/Core/ValueOrError.h>
@@ -100,23 +100,23 @@ namespace Xidi
           std::wstring_view directionString)
       {
         // Map of strings representing axis directions to axis direction enumerators.
-        static const std::map<std::wstring_view, EAxisDirection> kDirectionStrings = {
-            {L"bidir", EAxisDirection::Both},         {L"Bidir", EAxisDirection::Both},
-            {L"BiDir", EAxisDirection::Both},         {L"BIDIR", EAxisDirection::Both},
-            {L"bidirectional", EAxisDirection::Both}, {L"Bidirectional", EAxisDirection::Both},
-            {L"BiDirectional", EAxisDirection::Both}, {L"BIDIRECTIONAL", EAxisDirection::Both},
-            {L"both", EAxisDirection::Both},          {L"Both", EAxisDirection::Both},
-            {L"BOTH", EAxisDirection::Both},
-
-            {L"+", EAxisDirection::Positive},         {L"+ve", EAxisDirection::Positive},
-            {L"pos", EAxisDirection::Positive},       {L"Pos", EAxisDirection::Positive},
-            {L"POS", EAxisDirection::Positive},       {L"positive", EAxisDirection::Positive},
-            {L"Positive", EAxisDirection::Positive},  {L"POSITIVE", EAxisDirection::Positive},
-
-            {L"-", EAxisDirection::Negative},         {L"-ve", EAxisDirection::Negative},
-            {L"neg", EAxisDirection::Negative},       {L"Neg", EAxisDirection::Negative},
-            {L"NEG", EAxisDirection::Negative},       {L"negative", EAxisDirection::Negative},
-            {L"Negative", EAxisDirection::Negative},  {L"NEGATIVE", EAxisDirection::Negative}};
+        static const std::unordered_map<
+            std::wstring_view,
+            EAxisDirection,
+            Infra::Strings::CaseInsensitiveHasher<wchar_t>,
+            Infra::Strings::CaseInsensitiveEqualityComparator<wchar_t>>
+            kDirectionStrings = {
+                {L"bidir", EAxisDirection::Both},
+                {L"bidirectional", EAxisDirection::Both},
+                {L"both", EAxisDirection::Both},
+                {L"+", EAxisDirection::Positive},
+                {L"+ve", EAxisDirection::Positive},
+                {L"pos", EAxisDirection::Positive},
+                {L"positive", EAxisDirection::Positive},
+                {L"-", EAxisDirection::Negative},
+                {L"-ve", EAxisDirection::Negative},
+                {L"neg", EAxisDirection::Negative},
+                {L"negative", EAxisDirection::Negative}};
 
         const auto directionIter = kDirectionStrings.find(directionString);
         if (kDirectionStrings.cend() == directionIter) return std::nullopt;
@@ -140,24 +140,21 @@ namespace Xidi
       template <> static std::optional<EAxis> AxisTypeFromString(std::wstring_view axisString)
       {
         // Map of strings representing axes to axis enumerators.
-        static const std::map<std::wstring_view, EAxis> kAxisStrings = {
-            {L"x", EAxis::X},       {L"X", EAxis::X},
-
-            {L"y", EAxis::Y},       {L"Y", EAxis::Y},
-
-            {L"z", EAxis::Z},       {L"Z", EAxis::Z},
-
-            {L"rx", EAxis::RotX},   {L"Rx", EAxis::RotX},   {L"rX", EAxis::RotX},
-            {L"RX", EAxis::RotX},   {L"rotx", EAxis::RotX}, {L"rotX", EAxis::RotX},
-            {L"Rotx", EAxis::RotX}, {L"RotX", EAxis::RotX},
-
-            {L"ry", EAxis::RotY},   {L"Ry", EAxis::RotY},   {L"rY", EAxis::RotY},
-            {L"RY", EAxis::RotY},   {L"roty", EAxis::RotY}, {L"rotY", EAxis::RotY},
-            {L"Roty", EAxis::RotY}, {L"RotY", EAxis::RotY},
-
-            {L"rz", EAxis::RotZ},   {L"Rz", EAxis::RotZ},   {L"rZ", EAxis::RotZ},
-            {L"RZ", EAxis::RotZ},   {L"rotz", EAxis::RotZ}, {L"rotZ", EAxis::RotZ},
-            {L"Rotz", EAxis::RotZ}, {L"RotZ", EAxis::RotZ}};
+        static const std::unordered_map<
+            std::wstring_view,
+            EAxis,
+            Infra::Strings::CaseInsensitiveHasher<wchar_t>,
+            Infra::Strings::CaseInsensitiveEqualityComparator<wchar_t>>
+            kAxisStrings = {
+                {L"x", EAxis::X},
+                {L"y", EAxis::Y},
+                {L"z", EAxis::Z},
+                {L"rx", EAxis::RotX},
+                {L"rotx", EAxis::RotX},
+                {L"ry", EAxis::RotY},
+                {L"roty", EAxis::RotY},
+                {L"rz", EAxis::RotZ},
+                {L"rotz", EAxis::RotZ}};
 
         const auto axisIter = kAxisStrings.find(axisString);
         if (kAxisStrings.cend() == axisIter) return std::nullopt;
@@ -172,42 +169,26 @@ namespace Xidi
           std::wstring_view axisString)
       {
         // Map of strings representing mouse axes to mouse axis enumerators.
-        static const std::map<std::wstring_view, Mouse::EMouseAxis> kMouseAxisStrings = {
-            {L"x", Mouse::EMouseAxis::X},
-            {L"X", Mouse::EMouseAxis::X},
-            {L"h", Mouse::EMouseAxis::X},
-            {L"H", Mouse::EMouseAxis::X},
-            {L"horiz", Mouse::EMouseAxis::X},
-            {L"Horiz", Mouse::EMouseAxis::X},
-            {L"horizontal", Mouse::EMouseAxis::X},
-            {L"Horizontal", Mouse::EMouseAxis::X},
-
-            {L"y", Mouse::EMouseAxis::Y},
-            {L"Y", Mouse::EMouseAxis::Y},
-            {L"v", Mouse::EMouseAxis::Y},
-            {L"V", Mouse::EMouseAxis::Y},
-            {L"vert", Mouse::EMouseAxis::Y},
-            {L"Vert", Mouse::EMouseAxis::Y},
-            {L"vertical", Mouse::EMouseAxis::Y},
-            {L"Vertical", Mouse::EMouseAxis::Y},
-
-            {L"wheelh", Mouse::EMouseAxis::WheelHorizontal},
-            {L"wheelH", Mouse::EMouseAxis::WheelHorizontal},
-            {L"WheelH", Mouse::EMouseAxis::WheelHorizontal},
-            {L"wheelx", Mouse::EMouseAxis::WheelHorizontal},
-            {L"wheelX", Mouse::EMouseAxis::WheelHorizontal},
-            {L"WheelX", Mouse::EMouseAxis::WheelHorizontal},
-            {L"wheelHorizontal", Mouse::EMouseAxis::WheelHorizontal},
-            {L"WheelHorizontal", Mouse::EMouseAxis::WheelHorizontal},
-
-            {L"wheelv", Mouse::EMouseAxis::WheelVertical},
-            {L"wheelV", Mouse::EMouseAxis::WheelVertical},
-            {L"WheelV", Mouse::EMouseAxis::WheelVertical},
-            {L"wheely", Mouse::EMouseAxis::WheelVertical},
-            {L"wheelY", Mouse::EMouseAxis::WheelVertical},
-            {L"WheelY", Mouse::EMouseAxis::WheelVertical},
-            {L"wheelVertical", Mouse::EMouseAxis::WheelVertical},
-            {L"WheelVertical", Mouse::EMouseAxis::WheelVertical}};
+        static const std::unordered_map<
+            std::wstring_view,
+            Mouse::EMouseAxis,
+            Infra::Strings::CaseInsensitiveHasher<wchar_t>,
+            Infra::Strings::CaseInsensitiveEqualityComparator<wchar_t>>
+            kMouseAxisStrings = {
+                {L"x", Mouse::EMouseAxis::X},
+                {L"h", Mouse::EMouseAxis::X},
+                {L"horiz", Mouse::EMouseAxis::X},
+                {L"horizontal", Mouse::EMouseAxis::X},
+                {L"y", Mouse::EMouseAxis::Y},
+                {L"v", Mouse::EMouseAxis::Y},
+                {L"vert", Mouse::EMouseAxis::Y},
+                {L"vertical", Mouse::EMouseAxis::Y},
+                {L"wheelh", Mouse::EMouseAxis::WheelHorizontal},
+                {L"wheelx", Mouse::EMouseAxis::WheelHorizontal},
+                {L"wheelhorizontal", Mouse::EMouseAxis::WheelHorizontal},
+                {L"wheelv", Mouse::EMouseAxis::WheelVertical},
+                {L"wheely", Mouse::EMouseAxis::WheelVertical},
+                {L"wheelvertical", Mouse::EMouseAxis::WheelVertical}};
 
         const auto mouseAxisIter = kMouseAxisStrings.find(axisString);
         if (kMouseAxisStrings.cend() == mouseAxisIter) return std::nullopt;
@@ -394,173 +375,178 @@ namespace Xidi
         // One pair exists per DIK_* constant. Comparisons with the input string are
         // case-insensitive because the input string is converted to uppercase to match the contents
         // of this map.
-        static const std::map<std::wstring_view, unsigned int> kKeyboardScanCodeStrings = {
+        static const std::unordered_map<
+            std::wstring_view,
+            unsigned int,
+            Infra::Strings::CaseInsensitiveHasher<wchar_t>,
+            Infra::Strings::CaseInsensitiveEqualityComparator<wchar_t>>
+            kKeyboardScanCodeStrings = {
 
-            // Convenience aliases
-            {L"ESC", DIK_ESCAPE},
-            {L"ENTER", DIK_RETURN},
-            {L"SCROLLLOCK", DIK_SCROLL},
+                // Convenience aliases
+                {L"ESC", DIK_ESCAPE},
+                {L"ENTER", DIK_RETURN},
+                {L"SCROLLLOCK", DIK_SCROLL},
 
-            // DIK_ constants
-            {L"ESCAPE", DIK_ESCAPE},
-            {L"1", DIK_1},
-            {L"2", DIK_2},
-            {L"3", DIK_3},
-            {L"4", DIK_4},
-            {L"5", DIK_5},
-            {L"6", DIK_6},
-            {L"7", DIK_7},
-            {L"8", DIK_8},
-            {L"9", DIK_9},
-            {L"0", DIK_0},
-            {L"MINUS", DIK_MINUS},
-            {L"EQUALS", DIK_EQUALS},
-            {L"BACK", DIK_BACK},
-            {L"TAB", DIK_TAB},
-            {L"Q", DIK_Q},
-            {L"W", DIK_W},
-            {L"E", DIK_E},
-            {L"R", DIK_R},
-            {L"T", DIK_T},
-            {L"Y", DIK_Y},
-            {L"U", DIK_U},
-            {L"I", DIK_I},
-            {L"O", DIK_O},
-            {L"P", DIK_P},
-            {L"LBRACKET", DIK_LBRACKET},
-            {L"RBRACKET", DIK_RBRACKET},
-            {L"RETURN", DIK_RETURN},
-            {L"LCONTROL", DIK_LCONTROL},
-            {L"A", DIK_A},
-            {L"S", DIK_S},
-            {L"D", DIK_D},
-            {L"F", DIK_F},
-            {L"G", DIK_G},
-            {L"H", DIK_H},
-            {L"J", DIK_J},
-            {L"K", DIK_K},
-            {L"L", DIK_L},
-            {L"SEMICOLON", DIK_SEMICOLON},
-            {L"APOSTROPHE", DIK_APOSTROPHE},
-            {L"GRAVE", DIK_GRAVE},
-            {L"LSHIFT", DIK_LSHIFT},
-            {L"BACKSLASH", DIK_BACKSLASH},
-            {L"Z", DIK_Z},
-            {L"X", DIK_X},
-            {L"C", DIK_C},
-            {L"V", DIK_V},
-            {L"B", DIK_B},
-            {L"N", DIK_N},
-            {L"M", DIK_M},
-            {L"COMMA", DIK_COMMA},
-            {L"PERIOD", DIK_PERIOD},
-            {L"SLASH", DIK_SLASH},
-            {L"RSHIFT", DIK_RSHIFT},
-            {L"MULTIPLY", DIK_MULTIPLY},
-            {L"LMENU", DIK_LMENU},
-            {L"SPACE", DIK_SPACE},
-            {L"CAPITAL", DIK_CAPITAL},
-            {L"F1", DIK_F1},
-            {L"F2", DIK_F2},
-            {L"F3", DIK_F3},
-            {L"F4", DIK_F4},
-            {L"F5", DIK_F5},
-            {L"F6", DIK_F6},
-            {L"F7", DIK_F7},
-            {L"F8", DIK_F8},
-            {L"F9", DIK_F9},
-            {L"F10", DIK_F10},
-            {L"NUMLOCK", DIK_NUMLOCK},
-            {L"SCROLL", DIK_SCROLL},
-            {L"NUMPAD7", DIK_NUMPAD7},
-            {L"NUMPAD8", DIK_NUMPAD8},
-            {L"NUMPAD9", DIK_NUMPAD9},
-            {L"SUBTRACT", DIK_SUBTRACT},
-            {L"NUMPAD4", DIK_NUMPAD4},
-            {L"NUMPAD5", DIK_NUMPAD5},
-            {L"NUMPAD6", DIK_NUMPAD6},
-            {L"ADD", DIK_ADD},
-            {L"NUMPAD1", DIK_NUMPAD1},
-            {L"NUMPAD2", DIK_NUMPAD2},
-            {L"NUMPAD3", DIK_NUMPAD3},
-            {L"NUMPAD0", DIK_NUMPAD0},
-            {L"DECIMAL", DIK_DECIMAL},
-            {L"OEM_102", DIK_OEM_102},
-            {L"F11", DIK_F11},
-            {L"F12", DIK_F12},
-            {L"F13", DIK_F13},
-            {L"F14", DIK_F14},
-            {L"F15", DIK_F15},
-            {L"KANA", DIK_KANA},
-            {L"ABNT_C1", DIK_ABNT_C1},
-            {L"CONVERT", DIK_CONVERT},
-            {L"NOCONVERT", DIK_NOCONVERT},
-            {L"YEN", DIK_YEN},
-            {L"ABNT_C2", DIK_ABNT_C2},
-            {L"NUMPADEQUALS", DIK_NUMPADEQUALS},
-            {L"PREVTRACK", DIK_PREVTRACK},
-            {L"AT", DIK_AT},
-            {L"COLON", DIK_COLON},
-            {L"UNDERLINE", DIK_UNDERLINE},
-            {L"KANJI", DIK_KANJI},
-            {L"STOP", DIK_STOP},
-            {L"AX", DIK_AX},
-            {L"UNLABELED", DIK_UNLABELED},
-            {L"NEXTTRACK", DIK_NEXTTRACK},
-            {L"NUMPADENTER", DIK_NUMPADENTER},
-            {L"RCONTROL", DIK_RCONTROL},
-            {L"MUTE", DIK_MUTE},
-            {L"CALCULATOR", DIK_CALCULATOR},
-            {L"PLAYPAUSE", DIK_PLAYPAUSE},
-            {L"MEDIASTOP", DIK_MEDIASTOP},
-            {L"VOLUMEDOWN", DIK_VOLUMEDOWN},
-            {L"VOLUMEUP", DIK_VOLUMEUP},
-            {L"WEBHOME", DIK_WEBHOME},
-            {L"NUMPADCOMMA", DIK_NUMPADCOMMA},
-            {L"DIVIDE", DIK_DIVIDE},
-            {L"SYSRQ", DIK_SYSRQ},
-            {L"RMENU", DIK_RMENU},
-            {L"PAUSE", DIK_PAUSE},
-            {L"HOME", DIK_HOME},
-            {L"UP", DIK_UP},
-            {L"PRIOR", DIK_PRIOR},
-            {L"LEFT", DIK_LEFT},
-            {L"RIGHT", DIK_RIGHT},
-            {L"END", DIK_END},
-            {L"DOWN", DIK_DOWN},
-            {L"NEXT", DIK_NEXT},
-            {L"INSERT", DIK_INSERT},
-            {L"DELETE", DIK_DELETE},
-            {L"LWIN", DIK_LWIN},
-            {L"RWIN", DIK_RWIN},
-            {L"APPS", DIK_APPS},
-            {L"POWER", DIK_POWER},
-            {L"SLEEP", DIK_SLEEP},
-            {L"WAKE", DIK_WAKE},
-            {L"WEBSEARCH", DIK_WEBSEARCH},
-            {L"WEBFAVORITES", DIK_WEBFAVORITES},
-            {L"WEBREFRESH", DIK_WEBREFRESH},
-            {L"WEBSTOP", DIK_WEBSTOP},
-            {L"WEBFORWARD", DIK_WEBFORWARD},
-            {L"WEBBACK", DIK_WEBBACK},
-            {L"MYCOMPUTER", DIK_MYCOMPUTER},
-            {L"MAIL", DIK_MAIL},
-            {L"MEDIASELECT", DIK_MEDIASELECT},
-            {L"BACKSPACE", DIK_BACKSPACE},
-            {L"NUMPADSTAR", DIK_NUMPADSTAR},
-            {L"LALT", DIK_LALT},
-            {L"CAPSLOCK", DIK_CAPSLOCK},
-            {L"NUMPADMINUS", DIK_NUMPADMINUS},
-            {L"NUMPADPLUS", DIK_NUMPADPLUS},
-            {L"NUMPADPERIOD", DIK_NUMPADPERIOD},
-            {L"NUMPADSLASH", DIK_NUMPADSLASH},
-            {L"RALT", DIK_RALT},
-            {L"UPARROW", DIK_UPARROW},
-            {L"PGUP", DIK_PGUP},
-            {L"LEFTARROW", DIK_LEFTARROW},
-            {L"RIGHTARROW", DIK_RIGHTARROW},
-            {L"DOWNARROW", DIK_DOWNARROW},
-            {L"PGDN", DIK_PGDN}};
+                // DIK_ constants
+                {L"ESCAPE", DIK_ESCAPE},
+                {L"1", DIK_1},
+                {L"2", DIK_2},
+                {L"3", DIK_3},
+                {L"4", DIK_4},
+                {L"5", DIK_5},
+                {L"6", DIK_6},
+                {L"7", DIK_7},
+                {L"8", DIK_8},
+                {L"9", DIK_9},
+                {L"0", DIK_0},
+                {L"MINUS", DIK_MINUS},
+                {L"EQUALS", DIK_EQUALS},
+                {L"BACK", DIK_BACK},
+                {L"TAB", DIK_TAB},
+                {L"Q", DIK_Q},
+                {L"W", DIK_W},
+                {L"E", DIK_E},
+                {L"R", DIK_R},
+                {L"T", DIK_T},
+                {L"Y", DIK_Y},
+                {L"U", DIK_U},
+                {L"I", DIK_I},
+                {L"O", DIK_O},
+                {L"P", DIK_P},
+                {L"LBRACKET", DIK_LBRACKET},
+                {L"RBRACKET", DIK_RBRACKET},
+                {L"RETURN", DIK_RETURN},
+                {L"LCONTROL", DIK_LCONTROL},
+                {L"A", DIK_A},
+                {L"S", DIK_S},
+                {L"D", DIK_D},
+                {L"F", DIK_F},
+                {L"G", DIK_G},
+                {L"H", DIK_H},
+                {L"J", DIK_J},
+                {L"K", DIK_K},
+                {L"L", DIK_L},
+                {L"SEMICOLON", DIK_SEMICOLON},
+                {L"APOSTROPHE", DIK_APOSTROPHE},
+                {L"GRAVE", DIK_GRAVE},
+                {L"LSHIFT", DIK_LSHIFT},
+                {L"BACKSLASH", DIK_BACKSLASH},
+                {L"Z", DIK_Z},
+                {L"X", DIK_X},
+                {L"C", DIK_C},
+                {L"V", DIK_V},
+                {L"B", DIK_B},
+                {L"N", DIK_N},
+                {L"M", DIK_M},
+                {L"COMMA", DIK_COMMA},
+                {L"PERIOD", DIK_PERIOD},
+                {L"SLASH", DIK_SLASH},
+                {L"RSHIFT", DIK_RSHIFT},
+                {L"MULTIPLY", DIK_MULTIPLY},
+                {L"LMENU", DIK_LMENU},
+                {L"SPACE", DIK_SPACE},
+                {L"CAPITAL", DIK_CAPITAL},
+                {L"F1", DIK_F1},
+                {L"F2", DIK_F2},
+                {L"F3", DIK_F3},
+                {L"F4", DIK_F4},
+                {L"F5", DIK_F5},
+                {L"F6", DIK_F6},
+                {L"F7", DIK_F7},
+                {L"F8", DIK_F8},
+                {L"F9", DIK_F9},
+                {L"F10", DIK_F10},
+                {L"NUMLOCK", DIK_NUMLOCK},
+                {L"SCROLL", DIK_SCROLL},
+                {L"NUMPAD7", DIK_NUMPAD7},
+                {L"NUMPAD8", DIK_NUMPAD8},
+                {L"NUMPAD9", DIK_NUMPAD9},
+                {L"SUBTRACT", DIK_SUBTRACT},
+                {L"NUMPAD4", DIK_NUMPAD4},
+                {L"NUMPAD5", DIK_NUMPAD5},
+                {L"NUMPAD6", DIK_NUMPAD6},
+                {L"ADD", DIK_ADD},
+                {L"NUMPAD1", DIK_NUMPAD1},
+                {L"NUMPAD2", DIK_NUMPAD2},
+                {L"NUMPAD3", DIK_NUMPAD3},
+                {L"NUMPAD0", DIK_NUMPAD0},
+                {L"DECIMAL", DIK_DECIMAL},
+                {L"OEM_102", DIK_OEM_102},
+                {L"F11", DIK_F11},
+                {L"F12", DIK_F12},
+                {L"F13", DIK_F13},
+                {L"F14", DIK_F14},
+                {L"F15", DIK_F15},
+                {L"KANA", DIK_KANA},
+                {L"ABNT_C1", DIK_ABNT_C1},
+                {L"CONVERT", DIK_CONVERT},
+                {L"NOCONVERT", DIK_NOCONVERT},
+                {L"YEN", DIK_YEN},
+                {L"ABNT_C2", DIK_ABNT_C2},
+                {L"NUMPADEQUALS", DIK_NUMPADEQUALS},
+                {L"PREVTRACK", DIK_PREVTRACK},
+                {L"AT", DIK_AT},
+                {L"COLON", DIK_COLON},
+                {L"UNDERLINE", DIK_UNDERLINE},
+                {L"KANJI", DIK_KANJI},
+                {L"STOP", DIK_STOP},
+                {L"AX", DIK_AX},
+                {L"UNLABELED", DIK_UNLABELED},
+                {L"NEXTTRACK", DIK_NEXTTRACK},
+                {L"NUMPADENTER", DIK_NUMPADENTER},
+                {L"RCONTROL", DIK_RCONTROL},
+                {L"MUTE", DIK_MUTE},
+                {L"CALCULATOR", DIK_CALCULATOR},
+                {L"PLAYPAUSE", DIK_PLAYPAUSE},
+                {L"MEDIASTOP", DIK_MEDIASTOP},
+                {L"VOLUMEDOWN", DIK_VOLUMEDOWN},
+                {L"VOLUMEUP", DIK_VOLUMEUP},
+                {L"WEBHOME", DIK_WEBHOME},
+                {L"NUMPADCOMMA", DIK_NUMPADCOMMA},
+                {L"DIVIDE", DIK_DIVIDE},
+                {L"SYSRQ", DIK_SYSRQ},
+                {L"RMENU", DIK_RMENU},
+                {L"PAUSE", DIK_PAUSE},
+                {L"HOME", DIK_HOME},
+                {L"UP", DIK_UP},
+                {L"PRIOR", DIK_PRIOR},
+                {L"LEFT", DIK_LEFT},
+                {L"RIGHT", DIK_RIGHT},
+                {L"END", DIK_END},
+                {L"DOWN", DIK_DOWN},
+                {L"NEXT", DIK_NEXT},
+                {L"INSERT", DIK_INSERT},
+                {L"DELETE", DIK_DELETE},
+                {L"LWIN", DIK_LWIN},
+                {L"RWIN", DIK_RWIN},
+                {L"APPS", DIK_APPS},
+                {L"POWER", DIK_POWER},
+                {L"SLEEP", DIK_SLEEP},
+                {L"WAKE", DIK_WAKE},
+                {L"WEBSEARCH", DIK_WEBSEARCH},
+                {L"WEBFAVORITES", DIK_WEBFAVORITES},
+                {L"WEBREFRESH", DIK_WEBREFRESH},
+                {L"WEBSTOP", DIK_WEBSTOP},
+                {L"WEBFORWARD", DIK_WEBFORWARD},
+                {L"WEBBACK", DIK_WEBBACK},
+                {L"MYCOMPUTER", DIK_MYCOMPUTER},
+                {L"MAIL", DIK_MAIL},
+                {L"MEDIASELECT", DIK_MEDIASELECT},
+                {L"BACKSPACE", DIK_BACKSPACE},
+                {L"NUMPADSTAR", DIK_NUMPADSTAR},
+                {L"LALT", DIK_LALT},
+                {L"CAPSLOCK", DIK_CAPSLOCK},
+                {L"NUMPADMINUS", DIK_NUMPADMINUS},
+                {L"NUMPADPLUS", DIK_NUMPADPLUS},
+                {L"NUMPADPERIOD", DIK_NUMPADPERIOD},
+                {L"NUMPADSLASH", DIK_NUMPADSLASH},
+                {L"RALT", DIK_RALT},
+                {L"UPARROW", DIK_UPARROW},
+                {L"PGUP", DIK_PGUP},
+                {L"LEFTARROW", DIK_LEFTARROW},
+                {L"RIGHTARROW", DIK_RIGHTARROW},
+                {L"DOWNARROW", DIK_DOWNARROW},
+                {L"PGDN", DIK_PGDN}};
 
         static constexpr size_t kMaxChars = 24;
         if (kbString.length() >= kMaxChars) return std::nullopt;
@@ -602,56 +588,41 @@ namespace Xidi
       static std::optional<Mouse::EMouseButton> ParseMouseButton(std::wstring_view mbString)
       {
         // Map of strings representing mouse buttons.
-        static const std::map<std::wstring_view, Mouse::EMouseButton> kMouseButtonStrings = {
+        static const std::unordered_map<
+            std::wstring_view,
+            Mouse::EMouseButton,
+            Infra::Strings::CaseInsensitiveHasher<wchar_t>,
+            Infra::Strings::CaseInsensitiveEqualityComparator<wchar_t>>
+            kMouseButtonStrings = {
 
-            // Left button
-            {L"left", Mouse::EMouseButton::Left},
-            {L"Left", Mouse::EMouseButton::Left},
-            {L"leftbutton", Mouse::EMouseButton::Left},
-            {L"Leftbutton", Mouse::EMouseButton::Left},
-            {L"LeftButton", Mouse::EMouseButton::Left},
+                // Left button
+                {L"left", Mouse::EMouseButton::Left},
+                {L"leftbutton", Mouse::EMouseButton::Left},
 
-            // Middle button, often also the button beneath the mouse wheel
-            {L"mid", Mouse::EMouseButton::Middle},
-            {L"Mid", Mouse::EMouseButton::Middle},
-            {L"middle", Mouse::EMouseButton::Middle},
-            {L"Middle", Mouse::EMouseButton::Middle},
-            {L"middlebutton", Mouse::EMouseButton::Middle},
-            {L"Middlebutton", Mouse::EMouseButton::Middle},
-            {L"MiddleButton", Mouse::EMouseButton::Middle},
-            {L"wheel", Mouse::EMouseButton::Middle},
-            {L"Wheel", Mouse::EMouseButton::Middle},
-            {L"wheelbutton", Mouse::EMouseButton::Middle},
-            {L"WheelButton", Mouse::EMouseButton::Middle},
+                // Middle button, often also the button beneath the mouse wheel
+                {L"mid", Mouse::EMouseButton::Middle},
+                {L"middle", Mouse::EMouseButton::Middle},
+                {L"middlebutton", Mouse::EMouseButton::Middle},
+                {L"wheel", Mouse::EMouseButton::Middle},
+                {L"wheelbutton", Mouse::EMouseButton::Middle},
 
-            // Right button
-            {L"right", Mouse::EMouseButton::Right},
-            {L"Right", Mouse::EMouseButton::Right},
-            {L"rightbutton", Mouse::EMouseButton::Right},
-            {L"Rightbutton", Mouse::EMouseButton::Right},
-            {L"RightButton", Mouse::EMouseButton::Right},
+                // Right button
+                {L"right", Mouse::EMouseButton::Right},
+                {L"rightbutton", Mouse::EMouseButton::Right},
 
-            // X1 button, often also used as "back" in internet browsers
-            {L"x1", Mouse::EMouseButton::X1},
-            {L"X1", Mouse::EMouseButton::X1},
-            {L"x1button", Mouse::EMouseButton::X1},
-            {L"X1Button", Mouse::EMouseButton::X1},
-            {L"back", Mouse::EMouseButton::X1},
-            {L"Back", Mouse::EMouseButton::X1},
-            {L"backbutton", Mouse::EMouseButton::X1},
-            {L"Backbutton", Mouse::EMouseButton::X1},
-            {L"BackButton", Mouse::EMouseButton::X1},
+                // X1 button, often also used as "back" in internet browsers
+                {L"x1", Mouse::EMouseButton::X1},
+                {L"x1button", Mouse::EMouseButton::X1},
+                {L"x1b", Mouse::EMouseButton::X1},
+                {L"back", Mouse::EMouseButton::X1},
+                {L"backbutton", Mouse::EMouseButton::X1},
 
-            // X2 button, often also used as "forward" in internet browsers
-            {L"x2", Mouse::EMouseButton::X2},
-            {L"X2", Mouse::EMouseButton::X2},
-            {L"x2button", Mouse::EMouseButton::X2},
-            {L"X2Button", Mouse::EMouseButton::X2},
-            {L"forward", Mouse::EMouseButton::X2},
-            {L"Forward", Mouse::EMouseButton::X2},
-            {L"forwardbutton", Mouse::EMouseButton::X2},
-            {L"Forwardbutton", Mouse::EMouseButton::X2},
-            {L"ForwardButton", Mouse::EMouseButton::X2}};
+                // X2 button, often also used as "forward" in internet browsers
+                {L"x2", Mouse::EMouseButton::X2},
+                {L"x2button", Mouse::EMouseButton::X2},
+                {L"x2b", Mouse::EMouseButton::X2},
+                {L"forward", Mouse::EMouseButton::X2},
+                {L"forwardbutton", Mouse::EMouseButton::X2}};
 
         const auto mouseButtonIter = kMouseButtonStrings.find(mbString);
         if (kMouseButtonStrings.cend() == mouseButtonIter)
@@ -699,29 +670,29 @@ namespace Xidi
       {
         // Map of strings representing controller elements to indices within the element map data
         // structure. One pair exists per field in the SElementMap structure.
-        static const std::map<std::wstring_view, unsigned int> kControllerElementStrings = {
-            {L"StickLeftX", ELEMENT_MAP_INDEX_OF(stickLeftX)},
-            {L"StickLeftY", ELEMENT_MAP_INDEX_OF(stickLeftY)},
-            {L"StickRightX", ELEMENT_MAP_INDEX_OF(stickRightX)},
-            {L"StickRightY", ELEMENT_MAP_INDEX_OF(stickRightY)},
-            {L"DpadUp", ELEMENT_MAP_INDEX_OF(dpadUp)},
-            {L"DpadDown", ELEMENT_MAP_INDEX_OF(dpadDown)},
-            {L"DpadLeft", ELEMENT_MAP_INDEX_OF(dpadLeft)},
-            {L"DpadRight", ELEMENT_MAP_INDEX_OF(dpadRight)},
-            {L"TriggerLT", ELEMENT_MAP_INDEX_OF(triggerLT)},
-            {L"TriggerRT", ELEMENT_MAP_INDEX_OF(triggerRT)},
-            {L"ButtonA", ELEMENT_MAP_INDEX_OF(buttonA)},
-            {L"ButtonB", ELEMENT_MAP_INDEX_OF(buttonB)},
-            {L"ButtonX", ELEMENT_MAP_INDEX_OF(buttonX)},
-            {L"ButtonY", ELEMENT_MAP_INDEX_OF(buttonY)},
-            {L"ButtonLB", ELEMENT_MAP_INDEX_OF(buttonLB)},
-            {L"ButtonRB", ELEMENT_MAP_INDEX_OF(buttonRB)},
-            {L"ButtonBack", ELEMENT_MAP_INDEX_OF(buttonBack)},
-            {L"ButtonStart", ELEMENT_MAP_INDEX_OF(buttonStart)},
-            {L"ButtonLS", ELEMENT_MAP_INDEX_OF(buttonLS)},
-            {L"ButtonRS", ELEMENT_MAP_INDEX_OF(buttonRS)},
-            {L"ButtonGuide", ELEMENT_MAP_INDEX_OF(buttonGuide)},
-            {L"ButtonShare", ELEMENT_MAP_INDEX_OF(buttonShare)}};
+        static const std::unordered_map<std::wstring_view, unsigned int> kControllerElementStrings =
+            {{L"StickLeftX", ELEMENT_MAP_INDEX_OF(stickLeftX)},
+             {L"StickLeftY", ELEMENT_MAP_INDEX_OF(stickLeftY)},
+             {L"StickRightX", ELEMENT_MAP_INDEX_OF(stickRightX)},
+             {L"StickRightY", ELEMENT_MAP_INDEX_OF(stickRightY)},
+             {L"DpadUp", ELEMENT_MAP_INDEX_OF(dpadUp)},
+             {L"DpadDown", ELEMENT_MAP_INDEX_OF(dpadDown)},
+             {L"DpadLeft", ELEMENT_MAP_INDEX_OF(dpadLeft)},
+             {L"DpadRight", ELEMENT_MAP_INDEX_OF(dpadRight)},
+             {L"TriggerLT", ELEMENT_MAP_INDEX_OF(triggerLT)},
+             {L"TriggerRT", ELEMENT_MAP_INDEX_OF(triggerRT)},
+             {L"ButtonA", ELEMENT_MAP_INDEX_OF(buttonA)},
+             {L"ButtonB", ELEMENT_MAP_INDEX_OF(buttonB)},
+             {L"ButtonX", ELEMENT_MAP_INDEX_OF(buttonX)},
+             {L"ButtonY", ELEMENT_MAP_INDEX_OF(buttonY)},
+             {L"ButtonLB", ELEMENT_MAP_INDEX_OF(buttonLB)},
+             {L"ButtonRB", ELEMENT_MAP_INDEX_OF(buttonRB)},
+             {L"ButtonBack", ELEMENT_MAP_INDEX_OF(buttonBack)},
+             {L"ButtonStart", ELEMENT_MAP_INDEX_OF(buttonStart)},
+             {L"ButtonLS", ELEMENT_MAP_INDEX_OF(buttonLS)},
+             {L"ButtonRS", ELEMENT_MAP_INDEX_OF(buttonRS)},
+             {L"ButtonGuide", ELEMENT_MAP_INDEX_OF(buttonGuide)},
+             {L"ButtonShare", ELEMENT_MAP_INDEX_OF(buttonShare)}};
 
         const auto controllerElementIter = kControllerElementStrings.find(controllerElementString);
         if (kControllerElementStrings.cend() == controllerElementIter)
@@ -734,9 +705,10 @@ namespace Xidi
       {
         // Map of strings representing controller elements to indices within the element map data
         // structure. One pair exists per field in the SForceFeedbackActuatorMap structure.
-        static const std::map<std::wstring_view, unsigned int> kForceFeedbackActuatorStrings = {
-            {L"ForceFeedback.LeftMotor", FFACTUATOR_MAP_INDEX_OF(leftMotor)},
-            {L"ForceFeedback.RightMotor", FFACTUATOR_MAP_INDEX_OF(rightMotor)}};
+        static const std::unordered_map<std::wstring_view, unsigned int>
+            kForceFeedbackActuatorStrings = {
+                {L"ForceFeedback.LeftMotor", FFACTUATOR_MAP_INDEX_OF(leftMotor)},
+                {L"ForceFeedback.RightMotor", FFACTUATOR_MAP_INDEX_OF(rightMotor)}};
 
         const auto ffActuatorIter = kForceFeedbackActuatorStrings.find(ffActuatorString);
         if (kForceFeedbackActuatorStrings.cend() == ffActuatorIter)
@@ -1110,26 +1082,23 @@ namespace Xidi
       ElementMapperOrError MakePovMapper(std::wstring_view params)
       {
         // Map of strings representing axes to POV direction.
-        static const std::map<std::wstring_view, EPovDirection> kPovDirectionStrings = {
-            {L"u", EPovDirection::Up},        {L"U", EPovDirection::Up},
-            {L"up", EPovDirection::Up},       {L"Up", EPovDirection::Up},
-            {L"UP", EPovDirection::Up},
-
-            {L"d", EPovDirection::Down},      {L"D", EPovDirection::Down},
-            {L"dn", EPovDirection::Down},     {L"Dn", EPovDirection::Down},
-            {L"DN", EPovDirection::Down},     {L"down", EPovDirection::Down},
-            {L"Down", EPovDirection::Down},   {L"DOWN", EPovDirection::Down},
-
-            {L"l", EPovDirection::Left},      {L"L", EPovDirection::Left},
-            {L"lt", EPovDirection::Left},     {L"Lt", EPovDirection::Left},
-            {L"LT", EPovDirection::Left},     {L"left", EPovDirection::Left},
-            {L"Left", EPovDirection::Left},   {L"LEFT", EPovDirection::Left},
-
-            {L"r", EPovDirection::Right},     {L"R", EPovDirection::Right},
-            {L"rt", EPovDirection::Right},    {L"Rt", EPovDirection::Right},
-            {L"RT", EPovDirection::Right},    {L"right", EPovDirection::Right},
-            {L"Right", EPovDirection::Right}, {L"RIGHT", EPovDirection::Right},
-        };
+        static const std::unordered_map<
+            std::wstring_view,
+            EPovDirection,
+            Infra::Strings::CaseInsensitiveHasher<wchar_t>,
+            Infra::Strings::CaseInsensitiveEqualityComparator<wchar_t>>
+            kPovDirectionStrings = {
+                {L"u", EPovDirection::Up},
+                {L"up", EPovDirection::Up},
+                {L"d", EPovDirection::Down},
+                {L"dn", EPovDirection::Down},
+                {L"down", EPovDirection::Down},
+                {L"l", EPovDirection::Left},
+                {L"lt", EPovDirection::Left},
+                {L"left", EPovDirection::Left},
+                {L"r", EPovDirection::Right},
+                {L"rt", EPovDirection::Right},
+                {L"right", EPovDirection::Right}};
 
         const auto povDirectionIter = kPovDirectionStrings.find(params);
         if (kPovDirectionStrings.cend() == povDirectionIter)
@@ -1266,58 +1235,28 @@ namespace Xidi
 
       SElementMapperParseResult ParseSingleElementMapper(std::wstring_view elementMapperString)
       {
-        static const std::map<std::wstring_view, TMakeElementMapperFunc>
+        static const std::unordered_map<
+            std::wstring_view,
+            TMakeElementMapperFunc,
+            Infra::Strings::CaseInsensitiveHasher<wchar_t>,
+            Infra::Strings::CaseInsensitiveEqualityComparator<wchar_t>>
             kMakeElementMapperFunctions = {
                 {L"axis", &MakeAxisMapper},
-                {L"Axis", &MakeAxisMapper},
-
                 {L"button", &MakeButtonMapper},
-                {L"Button", &MakeButtonMapper},
-
                 {L"compound", &MakeCompoundMapper},
-                {L"Compound", &MakeCompoundMapper},
-
                 {L"digitalaxis", &MakeDigitalAxisMapper},
-                {L"digitalAxis", &MakeDigitalAxisMapper},
-                {L"Digitalaxis", &MakeDigitalAxisMapper},
-                {L"DigitalAxis", &MakeDigitalAxisMapper},
-
                 {L"invert", &MakeInvertMapper},
-                {L"Invert", &MakeInvertMapper},
-
                 {L"keyboard", &MakeKeyboardMapper},
-                {L"Keyboard", &MakeKeyboardMapper},
                 {L"keystroke", &MakeKeyboardMapper},
-                {L"Keystroke", &MakeKeyboardMapper},
-                {L"KeyStroke", &MakeKeyboardMapper},
-
                 {L"mouseaxis", &MakeMouseAxisMapper},
-                {L"Mouseaxis", &MakeMouseAxisMapper},
-                {L"MouseAxis", &MakeMouseAxisMapper},
-
                 {L"mousebutton", &MakeMouseButtonMapper},
-                {L"Mousebutton", &MakeMouseButtonMapper},
-                {L"MouseButton", &MakeMouseButtonMapper},
-
                 {L"pov", &MakePovMapper},
-                {L"Pov", &MakePovMapper},
-                {L"POV", &MakePovMapper},
                 {L"povhat", &MakePovMapper},
-                {L"povHat", &MakePovMapper},
-                {L"Povhat", &MakePovMapper},
-                {L"PovHat", &MakePovMapper},
-
                 {L"null", &MakeNullMapper},
-                {L"Null", &MakeNullMapper},
                 {L"nothing", &MakeNullMapper},
-                {L"Nothing", &MakeNullMapper},
                 {L"none", &MakeNullMapper},
-                {L"None", &MakeNullMapper},
                 {L"nil", &MakeNullMapper},
-                {L"Nil", &MakeNullMapper},
-
-                {L"split", &MakeSplitMapper},
-                {L"Split", &MakeSplitMapper}};
+                {L"split", &MakeSplitMapper}};
 
         const std::optional<SStringParts> maybeElementMapperStringParts =
             ExtractElementMapperStringParts(elementMapperString);
@@ -1348,33 +1287,23 @@ namespace Xidi
 
       ForceFeedbackActuatorOrError ParseForceFeedbackActuator(std::wstring_view ffActuatorString)
       {
-        static const std::map<std::wstring_view, TMakeForceFeedbackActuatorFunc>
+        static const std::unordered_map<
+            std::wstring_view,
+            TMakeForceFeedbackActuatorFunc,
+            Infra::Strings::CaseInsensitiveHasher<wchar_t>,
+            Infra::Strings::CaseInsensitiveEqualityComparator<wchar_t>>
             kMakeForceFeedbackActuatorFunctions = {
                 {L"disable", &MakeForceFeedbackActuatorDisabled},
-                {L"Disable", &MakeForceFeedbackActuatorDisabled},
                 {L"disabled", &MakeForceFeedbackActuatorDisabled},
-                {L"Disabled", &MakeForceFeedbackActuatorDisabled},
                 {L"empty", &MakeForceFeedbackActuatorDisabled},
-                {L"Empty", &MakeForceFeedbackActuatorDisabled},
                 {L"none", &MakeForceFeedbackActuatorDisabled},
-                {L"None", &MakeForceFeedbackActuatorDisabled},
                 {L"nothing", &MakeForceFeedbackActuatorDisabled},
-                {L"Nothing", &MakeForceFeedbackActuatorDisabled},
                 {L"null", &MakeForceFeedbackActuatorDisabled},
-                {L"Null", &MakeForceFeedbackActuatorDisabled},
                 {L"off", &MakeForceFeedbackActuatorDisabled},
-                {L"Off", &MakeForceFeedbackActuatorDisabled},
                 {L"unused", &MakeForceFeedbackActuatorDisabled},
-                {L"Unused", &MakeForceFeedbackActuatorDisabled},
-
                 {L"default", &MakeForceFeedbackActuatorDefault},
-                {L"Default", &MakeForceFeedbackActuatorDefault},
-
                 {L"singleaxis", &MakeForceFeedbackActuatorSingleAxis},
-                {L"SingleAxis", &MakeForceFeedbackActuatorSingleAxis},
-
-                {L"magnitudeprojection", &MakeForceFeedbackActuatorMagnitudeProjection},
-                {L"MagnitudeProjection", &MakeForceFeedbackActuatorMagnitudeProjection}};
+                {L"magnitudeprojection", &MakeForceFeedbackActuatorMagnitudeProjection}};
 
         const std::optional<SStringParts> maybeForceFeedbackActuatorStringParts =
             ExtractForceFeedbackActuatorStringParts(ffActuatorString);
