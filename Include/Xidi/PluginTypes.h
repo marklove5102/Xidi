@@ -44,13 +44,13 @@ namespace Xidi
     /// @return Name of the plugin.
     virtual std::wstring_view PluginName(void) = 0;
 
-    /// Invoked to give this plugin an opportunity to initialize. Xidi will call this method
-    /// before any of the others. All plugin types are allowed to initialize before they are used.
-    /// As a matter of best practice, this is where any expensive initialization should occur,
-    /// rather than in the constructor or the DLL entry point. That is because Xidi will
-    /// unconditionally load all plugin DLL files that are requested in the configuration file and
-    /// subsequenty request interface pointers to all available plugin interfaces, but it will only
-    /// initialize the specific plugin interfaces that it intends to use.
+    /// Invoked to give this plugin an opportunity to initialize. All plugin types are allowed to
+    /// initialize before they are used. As a matter of best practice, this is where any expensive
+    /// initialization should occur, rather than in the constructor or the DLL entry point. That is
+    /// because Xidi will unconditionally load all plugin DLL files that are requested in the
+    /// configuration file and subsequently request interface pointers to all available plugin
+    /// interfaces, but it will only initialize the specific plugin interfaces that it intends to
+    /// use.
     /// @return `true` if initialization was successful and the plugin can be used, `false`
     /// otherwise.
     virtual bool Initialize(void) = 0;
